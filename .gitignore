@@ -12,3 +12,10 @@ create_diffs.js
 diffs/
 create_commit.js
 rebase_tags.js
+
+
+# Added by cargo
+#
+# already existing elements were commented out
+
+#/target
