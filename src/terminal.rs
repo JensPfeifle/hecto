@@ -31,6 +31,9 @@ impl Terminal {
     pub fn clear_screen() {
         print!("{}", termion::clear::All);
     }
+    pub fn clear_current_line() {
+        print!("{}", termion::clear::CurrentLine);
+    }
 
     pub fn position_cursor(x: u16, y: u16) {
         let x = x.saturating_add(1);
