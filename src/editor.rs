@@ -23,12 +23,14 @@ impl Editor {
     }
 
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
+        Terminal::hide_cursor();
         Terminal::clear_screen();
         Terminal::position_cursor(0, 0);
         if !self.should_quit {
             self.draw_rows();
             Terminal::position_cursor(0, 0);
         }
+        Terminal::show_cursor();
         Terminal::flush()
     }
 
