@@ -1,29 +1,39 @@
-use std::io::{self, stdout};
+use crate::Terminal;
 use termion::event::Key;
-use termion::input::TermRead;
-use termion::raw::IntoRawMode;
 
 pub struct Editor {
     should_quit: bool,
+    terminal: Terminal,
 }
 
 impl Editor {
     pub fn run(&mut self) {
         println!("^q to exit");
-        // set terminal to raw mode, keep reference to stdout around
-        let _stdout = stdout().into_raw_mode().unwrap();
         loop {
-            if let Err(err) = self.process_keypress() {
+            if let Err(err) = self.refresh_screen() {
                 die(err);
             }
             if self.should_quit {
                 break;
             }
+            if let Err(err) = self.process_keypress() {
+                die(err);
+            }
         }
     }
 
+    fn refresh_screen(&self) -> Result<(), std::io::Error> {
+        Terminal::clear_screen();
+        Terminal::position_cursor(0, 0);
+        if !self.should_quit {
+            self.draw_rows();
+            Terminal::position_cursor(0, 0);
+        }
+        Terminal::flush()
+    }
+
     fn process_keypress(&mut self) -> Result<(), std::io::Error> {
-        let pressed_key = read_key()?;
+        let pressed_key = Terminal::read_key()?;
         match pressed_key {
             Key::Ctrl('q') => self.should_quit = true,
             Key::Char(c) => println!("{}\r", c),
@@ -32,19 +42,21 @@ impl Editor {
         Ok(())
     }
 
-    pub fn default() -> Self {
-        Editor { should_quit: false }
+    fn draw_rows(&self) {
+        for _ in 0..self.terminal.size().height - 1 {
+            println!("~\r")
+        }
     }
-}
 
-fn read_key() -> Result<Key, std::io::Error> {
-    loop {
-        if let Some(key) = io::stdin().lock().keys().next() {
-            return key;
+    pub fn default() -> Self {
+        Editor {
+            should_quit: false,
+            terminal: Terminal::default().expect("Failed to initialize terminal"),
         }
     }
 }
 
 fn die(e: std::io::Error) {
+    Terminal::clear_screen();
     panic!(e)
 }
