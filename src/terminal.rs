@@ -1,3 +1,4 @@
+use crate::Position;
 use std::io::{self, stdout, Write};
 use termion::event::Key;
 use termion::input::TermRead;
@@ -35,9 +36,12 @@ impl Terminal {
         print!("{}", termion::clear::CurrentLine);
     }
 
-    pub fn position_cursor(x: u16, y: u16) {
-        let x = x.saturating_add(1);
-        let y = y.saturating_add(1);
+    #[allow(clippy::cast_possible_truncation)]
+    pub fn position_cursor(position: &Position) {
+        let x = position.x.saturating_add(1);
+        let y = position.y.saturating_add(1);
+        let x = x as u16;
+        let y = y as u16;
         print!("{}", termion::cursor::Goto(x, y));
     }
 
