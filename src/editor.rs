@@ -88,11 +88,15 @@ impl Editor {
         }
     }
 
+    #[allow(clippy::clippy::option_if_let_else)]
     fn move_cursor(&mut self, key: Key) {
         let Position { mut x, mut y } = self.cursor_position;
-        let size = self.terminal.size();
         let height = self.document.len();
-        let width = size.width.saturating_sub(1) as usize;
+        let width = if let Some(row) = self.document.row(y) {
+            row.len()
+        } else {
+            0
+        };
 
         match key {
             Key::Up => y = y.saturating_sub(1),
@@ -113,6 +117,17 @@ impl Editor {
             Key::End => x = width,
             _ => (),
         }
+
+        let width = if let Some(row) = self.document.row(y) {
+            row.len()
+        } else {
+            0
+        };
+
+        if x > width {
+            x = width;
+        }
+
         self.cursor_position = Position { x, y };
     }
 
